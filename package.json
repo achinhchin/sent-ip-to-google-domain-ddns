@@ -4,12 +4,16 @@
   "description": "> ### **Create token.json file**\r > 1. Create at Path ./\r > 2. in file you can can type like this\r > ```\r > [\r >  {\r >   \"user\": \"(username)\",\r >   \"pass\": \"(password)\",\r >   \"domain\": \"(domain name like example.com)\" ,\r >  },\r >  {\r >   \"user\": \"(username)\",\r >   \"pass\": \"(password)\",\r >   \"domain\": \"(domain name like www.example.com)\" ,\r >  }\r > ]\r > ```",
   "main": "./build/main.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "nodemon ./build/main.js",
+    "build": "rimraf ./build/ && tsc",
+    "start": "npm run build && node ./build/main.js"
   },
   "author": "chinhchin",
   "license": "MIT",
   "dependencies": {
+    "@types/node": "^17.0.18",
     "nodemon": "^2.0.15",
+    "rimraf": "^3.0.2",
     "ts-node": "^10.5.0",
     "typescript": "^4.5.5"
   }
