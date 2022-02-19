@@ -23,5 +23,10 @@
 
 > ### **type this in terminal.**
 > ```
-> npm install && npm start
+> npm i && npm start
+> ```
+
+> ### **if you also wanna use npm run dev, type this in termianl**
+> ```
+> npm i ts-node -g
 > ```

@@ -1,4 +1,5 @@
 import * as fs from 'fs'
+import axios from 'axios'
 
 type TokenModel = {
     user: string,
@@ -7,57 +8,71 @@ type TokenModel = {
 }[];
 
 class Main {
-    cache: string;
-    homeIp: string;
-    
+    cache: string = '';
+    homeIp: string = '';
+
     constructor() {
-        this.cache = Cache.get();
-        this.homeIp = '';
-        this.getHomeIp().then(_ => this.homeIp = _);
+        this.init();
+    }
 
-        setInterval(() => {
+    async init(): Promise<void> {
+        this.cache = await this.getHomeIp();
+        Cache.write(this.cache);
+        this.homeIp = await this.getHomeIp(); 
+
+        this.updateIpToDdns();
+
+        setInterval(async () => {
             this.cache = Cache.get();
-            this.getHomeIp().then(_ => this.homeIp = _);
+            this.homeIp = await this.getHomeIp();
 
+            
             if (this.homeIp != this.cache) {
-                this.getToken().forEach(tokenData => {
-                    fetch(`https://${tokenData.user}:${tokenData.pass}@domains.google.com/nic/update?hostname=${tokenData.domain}&myip=${this.getHomeIp}`);
-                });
+                this.updateIpToDdns();
+                Cache.write(this.homeIp);
             }
         }, 60 * 1000);
     }
 
-    public async getHomeIp():Promise<string> {
-        let ip:string = '';
-        ip = await (await fetch('https://api.ipify.org')).text();
-        return ip;
+    public updateIpToDdns(): void {
+        this.getToken.forEach(tokenData => {
+            axios.get(`https://${tokenData.user}:${tokenData.pass}@domains.google.com/nic/update?hostname=${tokenData.domain}&myip=${this.homeIp}`);
+            fs.writeFileSync('log/main.txt', 'ip changed from (' + this.cache + ') to (' + this.homeIp + ')' + ',  time : ' + new Date().toLocaleString() + '\n', {encoding: 'utf8', flag: 'a'});
+        });
     }
 
-    public getToken():TokenModel {
-        let data = fs.readFileSync('./data/token.json', {encoding: 'utf8', flag: 'w+'});
+    public async getHomeIp(): Promise<string> {
+        return (await axios.get('https://api.ipify.org')).data;
+    }
+
+    public get getToken(): TokenModel {
+        let data = fs.readFileSync('./data/token.json', { encoding: 'utf8'});
         if (data != '') {
             return JSON.parse(data);
-        }else {
+        } else {
             return [];
         }
     }
 }
 
 class Cache {
-    public static get():string { 
-        let data:string = fs.readFileSync('./data/cache.json', {encoding: 'utf8', flag: 'w+'});
+    public static get(): string {
+        let data: string = fs.readFileSync('./data/cache.json', { encoding: 'utf8', flag: 'w+' });
         if (data != '') {
             return JSON.parse(data);
-        }else {
+        } else {
             return '';
         }
     }
 
-    public static write(data: string):void {
-        fs.writeFileSync('./data/cache.json', JSON.stringify(data), {encoding: 'utf8', flag: 'w+'});
+    public static write(data: string): void {
+        fs.writeFileSync('./data/cache.txt', data, { encoding: 'utf8', flag: 'w+' });
     }
 }
 
-const main = () => new Main();
+const main = () => {
+    console.log('system start');
+    new Main();
+}
 
 main();
