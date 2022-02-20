@@ -5,7 +5,7 @@ type TokenModel = {
     user: string,
     pass: string,
     domain: string
-}[];
+};
 
 class Main {
     cache: string = '';
@@ -18,14 +18,14 @@ class Main {
     async init(): Promise<void> {
         this.cache = await this.getHomeIp();
         Cache.write(this.cache);
-        this.homeIp = await this.getHomeIp(); 
+        this.homeIp = await this.getHomeIp();
 
         this.updateIpToDdns();
 
         setInterval(async () => {
             this.cache = Cache.get();
             this.homeIp = await this.getHomeIp();
-            
+
             if (this.homeIp != this.cache) {
                 this.updateIpToDdns();
                 Cache.write(this.homeIp);
@@ -36,19 +36,24 @@ class Main {
     public updateIpToDdns(): void {
         this.getToken.forEach(tokenData => {
             axios.get(`https://${tokenData.user}:${tokenData.pass}@domains.google.com/nic/update?hostname=${tokenData.domain}&myip=${this.homeIp}`);
-            if (!fs.existsSync('./log/')) {
-                fs.mkdirSync('./log/');
-            }
-            fs.writeFileSync('./log/main.txt', 'ip changed from (' + this.cache + ') to (' + this.homeIp + ') at ' + tokenData.domain + ',  time : ' + new Date().toLocaleString() + '\n', {encoding: 'utf8', flag: 'a+'});
+            this.log(tokenData);
         });
+    }
+
+    public log(tokenData: TokenModel): void {
+        if (!fs.existsSync('./log/')) {
+            fs.mkdirSync('./log/');
+        }
+        fs.writeFileSync('./log/main.txt', 'ip changed from (' + this.cache + ') to (' + this.homeIp + ') at ' + tokenData.domain + ',  time : ' + new Date().toLocaleString() + '\n', { encoding: 'utf8', flag: 'a+' });
+        console.log('ip changed from (' + this.cache + ') to (' + this.homeIp + ') at ' + tokenData.domain + ',  time : ' + new Date().toLocaleString() + '\n');
     }
 
     public async getHomeIp(): Promise<string> {
         return (await axios.get('https://api.ipify.org')).data;
     }
 
-    public get getToken(): TokenModel {
-        let data = fs.readFileSync('./data/token.json', { encoding: 'utf8'});
+    public get getToken(): TokenModel[] {
+        let data = fs.readFileSync('./data/token.json', { encoding: 'utf8' });
         if (data != '') {
             return JSON.parse(data);
         } else {
@@ -60,7 +65,7 @@ class Main {
 class Cache {
     public static get(): string {
         let data: string = fs.readFileSync('./data/cache.txt', { encoding: 'utf8', flag: 'rs+' });
-        
+
         if (data != '') {
             return data;
         } else {
