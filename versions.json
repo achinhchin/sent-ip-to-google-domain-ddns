@@ -1,0 +1,42 @@
+{
+    "versions": {
+        "0.0": {
+            "features": [
+                "get home ip",
+                "save ip to cache",
+                "check if home ip is the same with cache every 1 minute",
+                "chane ip to the google domains ddns",
+                "log every time cache change"
+            ],
+            "release": false,
+            "updates": [
+                "Init"
+            ],
+            "development versions": {
+                "alpha": {
+                    "0.0.a.0": [
+                        "get all features"
+                    ],
+                    "0.0.a.1": [
+                        "add log to command line when launch app",
+                        "change from version.json to versions.md"
+                    ],
+                    "0.0.a.2": [
+                        "update from versions.md to versions.json",
+                    ]
+                }
+            }
+        }
+    },
+    "features": {
+        "future": {},
+        "present": {
+            "get home ip": "0.0.a.0 -> now",
+            "save ip to cache": "0.0.a.0 -> now",
+            "check if home ip is the same with cache every 1 minute": "0.0.a.0 -> now",
+            "chane ip to the google domains ddns": "0.0.a.0 -> now",
+            "log every time cache change": "0.0.a.0 -> now"
+        },
+        "past": {}
+    }
+}
